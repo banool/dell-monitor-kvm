@@ -1,0 +1,5 @@
+# My stuff
+*.swp
+
+# Rust stuff
+/target
