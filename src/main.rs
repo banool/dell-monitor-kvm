@@ -1,7 +1,9 @@
 #[cxx::bridge]
 mod ffi {
 
+    // TODO: Use this https://github.com/dtolnay/cxx/pull/847.
     #[repr(i32)]
+    #[derive(Debug)]
     enum MONITOR_CODE {
         MONITOR_SUCCESS = 0,
         MONITOR_FAILURE = -1,      /* General failure */
@@ -22,10 +24,11 @@ mod ffi {
 
         type MONITOR_CODE;
 
-        fn ConnectMonitor(monitor: u16) -> MONITOR_CODE;
+        fn ConnectMonitor(monitor: u8) -> MONITOR_CODE;
     }
 }
 
 fn main() {
-    ffi::ConnectMonitor(0);
+    let res = ffi::ConnectMonitor(0);
+    println!("res: {:?}", res);
 }

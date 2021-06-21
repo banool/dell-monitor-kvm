@@ -1,5 +1,6 @@
 # My stuff
 *.swp
+.DS_Store
 
 # Rust stuff
 /target
