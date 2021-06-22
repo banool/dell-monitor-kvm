@@ -2,7 +2,7 @@
 
 FILE:		UP_DATA.H
 DESCR:		Declaration of typedefs, structures & etc.
-VER:		3.0.0	18 Feb 2019
+VER:		3.1.0
 COPYRIGHT:	Dell Inc.
 
 ***/
@@ -37,11 +37,13 @@ COPYRIGHT:	Dell Inc.
 #define OFF					0
 #define ON					1
 
-#define MAX_MONITOR_NAME_LEN 10
-#define MAX_ASSET_TAG_LEN    10
-#define MAX_SERIAL_NUM_LEN   12
-#define MAX_SERVICE_TAG_LEN  7
-#define MAX_FIRMWARE_VER_LEN 10
+#define MAX_MONITOR_NAME_LEN			10
+#define MAX_ASSET_TAG_LEN				10
+#define MAX_SERIAL_NUM_LEN				12
+#define MAX_SERVICE_TAG_LEN				7
+#define MAX_FIRMWARE_VER_LEN			10
+#define MAX_READ_COLORSPACE_NAME_LEN	20 /* inclusive of end of str char \0 */
+#define MAX_WRITE_COLORSPACE_NAME_LEN	13 /* inclusive of end of str char \0 */
 
 /* RETURN CODES */
 typedef enum monitor_code
@@ -61,6 +63,18 @@ typedef enum monitor_code
 									   "Cannot establish communication with monitor, please quit other monitor applications and launch again." */
 }
 MONITOR_CODE;  
+
+typedef enum monitor_state
+{
+	MONITOR_STATE_UNKNOWN     = 0,
+	MONITOR_STATE_READY       = 1,
+	MONITOR_STATE_WARMUP      = 2,
+	MONITOR_STATE_CALIBRATION = 3,
+	MONITOR_STATE_VALIDATION  = 4,
+	MONITOR_STATE_CORRELATION = 5,
+	MONITOR_STATE_NEED_WARMUP = 6
+}
+MONITOR_STATE;
 
 typedef enum power_state
 {
@@ -109,15 +123,19 @@ ASPECT_RATIO;
 typedef enum response_time
 {
 	RESPONSE_TIME_NORMAL = 0,
-	RESPONSE_TIME_FAST   = 1
+	RESPONSE_TIME_FAST   = 1,
+	/* UP3221Q */
+	RESPONSE_TIME_OFF    = 2
 }
 RESPONSE_TIME;
 
 typedef enum hdr
 {
-	HDR_OFF = 0,
+	HDR_OFF    = 0,
+	HDR_ON     = 1, 
+	/* UP3221Q */
 	HDR_NORMAL = 1,
-	HDR_VIVID = 2
+	HDR_VIVID  = 2
 }
 HDR;
 
@@ -132,20 +150,20 @@ DCI_MASKING;
 
 typedef enum markers
 {
-	MARKERS_NONE = 0x00,
-	MARKERS_1_85X1 = 0x01,
-	MARKERS_2_39X1 = 0x02,
-	MARKERS_2_35X1 = 0x03,
-	MARKERS_1X1 = 0x04,
-	MARKERS_16X9_EXTRACTION = 0x05,
+	MARKERS_NONE             = 0x00,
+	MARKERS_1_85X1           = 0x01,
+	MARKERS_2_39X1           = 0x02,
+	MARKERS_2_35X1           = 0x03,
+	MARKERS_1X1              = 0x04,
+	MARKERS_16X9_EXTRACTION  = 0x05,
 	MARKERS_16X9_ACTION_SAFE = 0x06,
-	MARKERS_16X9_TILE_SAFE = 0x07,
-	MARKERS_4X3_EXTRACTION = 0x08,
-	MARKERS_4X3_ACTION_SAFE = 0x09,
-	MARKERS_4X3_TILE_SAFE = 0x0A,
+	MARKERS_16X9_TILE_SAFE   = 0x07,
+	MARKERS_4X3_EXTRACTION   = 0x08,
+	MARKERS_4X3_ACTION_SAFE  = 0x09,
+	MARKERS_4X3_TILE_SAFE    = 0x0A,
 	MARKERS_CENTER_CROSSHAIR = 0x0B,
-	MARKERS_THIRDS = 0x0C,
-	MARKERS_2_2X1 = 0x0D
+	MARKERS_THIRDS           = 0x0C,
+	MARKERS_2_2X1            = 0x0D
 }
 MARKERS;
 
@@ -186,8 +204,7 @@ typedef enum color_space
 	COLOR_SPACE_CAL_1			= 0x00000010,
 	COLOR_SPACE_CAL_2			= 0x00000020,
 	COLOR_SPACE_REC_2020		= 0x00000040,
-
-	/* UP2720Q */
+	/* UP2720Q & UP3221Q */
 	COLOR_SPACE2_DCI_P3         = 0x10000001,
 	COLOR_SPACE2_BT_709         = 0x10000002,
 	COLOR_SPACE2_BT_2020        = 0x10000004,
@@ -199,7 +216,10 @@ typedef enum color_space
 	COLOR_SPACE2_CUSTOM_2       = 0x10000100,
 	COLOR_SPACE2_CUSTOM_3       = 0x10000200,
 	COLOR_SPACE2_CAL_1          = 0x10000400,
-	COLOR_SPACE2_CAL_2          = 0x10000800
+	COLOR_SPACE2_CAL_2          = 0x10000800,
+	/* UP3221Q */
+	COLOR_SPACE2_HDR_PQ         = 0x10001000,
+	COLOR_SPACE2_HDR_HLG        = 0x10002000
 }
 COLOR_SPACE;
 
@@ -214,6 +234,7 @@ typedef enum color_space_mode
 	COLOR_SPACE_MODE_ADOBE_RGB_D50     = 0x00000005,
 	COLOR_SPACE_MODE_CAL_1             = 0x00000006,
 	COLOR_SPACE_MODE_CAL_2             = 0x00000007,
+	/* UP2720Q UC */
 	COLOR_SPACE_MODE_DCI_P3_UC         = 0x00000008,
 	COLOR_SPACE_MODE_BT_709_UC         = 0x00000009,
 	COLOR_SPACE_MODE_BT_2020_UC        = 0x0000000A,
@@ -221,7 +242,12 @@ typedef enum color_space_mode
 	COLOR_SPACE_MODE_ADOBE_RGB_D65_UC  = 0x0000000C,
 	COLOR_SPACE_MODE_ADOBE_RGB_D50_UC  = 0x0000000D,
 	COLOR_SPACE_MODE_CAL_1_UC          = 0x0000000E,
-	COLOR_SPACE_MODE_CAL_2_UC          = 0x0000000F
+	COLOR_SPACE_MODE_CAL_2_UC          = 0x0000000F,
+	/* UP3221Q */
+	COLOR_SPACE_MODE_HDR_PQ            = 0x00000010,
+	COLOR_SPACE_MODE_HDR_PQ_UC         = 0x00000011,
+	COLOR_SPACE_MODE_HDR_HLG           = 0x00000012,
+	COLOR_SPACE_MODE_HDR_HLG_UC        = 0x00000013
 }
 COLOR_SPACE_MODE;
 
@@ -291,34 +317,45 @@ UNIFORMITY_COMPENSATION;
 
 typedef enum white_point
 {
-	WHITE_POINT_D50 = 1,
-	WHITE_POINT_D55 = 2,
-	WHITE_POINT_D60 = 3,
-	WHITE_POINT_D65 = 4,
-	WHITE_POINT_DCI_P3 = 5,
-	WHITE_POINT_NATIVE = 6
+	WHITE_POINT_D50		= 1,
+	WHITE_POINT_D55		= 2,
+	WHITE_POINT_D60		= 3,
+	WHITE_POINT_D65		= 4,
+	WHITE_POINT_DCI_P3  = 5, /* Not valid for UP3221Q */
+	WHITE_POINT_NATIVE	= 6,
+	/* UP3221Q */
+	WHITE_POINT_D63		= 7,
+	WHITE_POINT_D93		= 8
 }
 WHITE_POINT;
 
 typedef enum gamma
 {
-	GAMMA_1_6 = 0x01,
-	GAMMA_1_8 = 0x02,
-	GAMMA_2_0 = 0x03,
-	GAMMA_2_2 = 0x04,
-	GAMMA_2_4 = 0x05,
-	GAMMA_2_6 = 0x06,
-	GAMMA_BT_1886 = 0x07,
-	GAMMA_SRGB = 0x08,
-	GAMMA_NATIVE = 0x09
+	GAMMA_1_6         = 0x01,
+	GAMMA_1_8         = 0x02,
+	GAMMA_2_0         = 0x03,
+	GAMMA_2_2         = 0x04,
+	GAMMA_2_4         = 0x05,
+	GAMMA_2_6         = 0x06,
+	GAMMA_BT_1886     = 0x07,
+	GAMMA_SRGB        = 0x08,
+	GAMMA_NATIVE      = 0x09,
+	/* UP3221Q */
+	GAMMA_PQ          = 0x0A,
+	GAMMA_PQ_TONEPLUS = 0x0B,
+	GAMMA_HLG         = 0x0C
 }
 GAMMA;
 
 typedef enum gamma_type
 {
-	GAMMA_TYPE_NORMAL = 0x01, //Normal gamma value (Ex: 1.6, 2.2, etc.)
-	GAMMA_TYPE_BT1886 = 0x20,
-	GAMMA_TYPE_SRGB   = 0x21
+	GAMMA_TYPE_NORMAL      = 0x01, //Normal gamma value (Ex: 1.6, 2.2, etc.)
+	GAMMA_TYPE_BT1886      = 0x20,
+	GAMMA_TYPE_SRGB        = 0x21,
+	/* UP3221Q */
+	GAMMA_TYPE_PQ          = 0x30,
+	GAMMA_TYPE_PQ_TONEPLUS = 0x31,
+	GAMMA_TYPE_HLG         = 0x32
 }
 GAMMA_TYPE;
 
@@ -355,7 +392,7 @@ VIDEO_INPUT_NAME;
 typedef enum audio_source
 {
 	AUDIO_SOURCE_MAIN = 0,
-	AUDIO_SOURCE_SUB = 1
+	AUDIO_SOURCE_SUB  = 1
 }
 AUDIO_SOURCE;
 
@@ -395,35 +432,35 @@ OSD_LANGUAGE;
 
 typedef enum osd_rotation
 {
-	OSD_ROTATION_0   = 0, 
-	OSD_ROTATION_90  = 1, 
-	OSD_ROTATION_270 = 2, 
-	OSD_ROTATION_180 = 3,
-	OSD_ROTATION_AUTO_ON = 4,
+	OSD_ROTATION_0        = 0, 
+	OSD_ROTATION_90       = 1, 
+	OSD_ROTATION_270      = 2, 
+	OSD_ROTATION_180      = 3,
+	OSD_ROTATION_AUTO_ON  = 4,
 	OSD_ROTATION_AUTO_OFF = 5
 }
 OSD_ROTATION;
 
 typedef enum osd_button
 {
-	OSD_BUTTON_UNLOCK = 0,                     //Unlock all Locks
-	OSD_BUTTON_LOCK = 1,
-	OSD_BUTTON_LOCK_OSD = 1,                   //Lock Menu Buttons
-	OSD_BUTTON_LOCK_POWER = 2,                 //Lock Power Button
-	OSD_BUTTON_LOCK_OSD_POWER = 3,             //Lock Menu + Power Button
+	OSD_BUTTON_UNLOCK                     = 0, //Unlock all Locks
+	OSD_BUTTON_LOCK                       = 1,
+	OSD_BUTTON_LOCK_OSD                   = 1, //Lock Menu Buttons
+	OSD_BUTTON_LOCK_POWER                 = 2, //Lock Power Button
+	OSD_BUTTON_LOCK_OSD_POWER             = 3, //Lock Menu + Power Button
 	OSD_BUTTON_LOCK_COLOR_CUSTOM_SETTINGS = 4, //Lock Color Custom Settings
-	OSD_BUTTON_LOCK_EXCEPT_POWER = 5           //Lock all except Power Button
+	OSD_BUTTON_LOCK_EXCEPT_POWER          = 5  //Lock all except Power Button
 }
 OSD_BUTTON;
 
 typedef enum software_lock
 {
-	SOFTWARE_LOCK_UNLOCK = OSD_BUTTON_UNLOCK,                             //Unlock all Locks
-	SOFTWARE_LOCK_MENU = OSD_BUTTON_LOCK_OSD,                             //Lock Menu Buttons
-	SOFTWARE_LOCK_POWER = OSD_BUTTON_LOCK_POWER,                          //Lock Power Button
-	SOFTWARE_LOCK_MENU_POWER = OSD_BUTTON_LOCK_OSD_POWER,                 //Lock Menu + Power Button
+	SOFTWARE_LOCK_UNLOCK         = OSD_BUTTON_UNLOCK,                     //Unlock all Locks
+	SOFTWARE_LOCK_MENU           = OSD_BUTTON_LOCK_OSD,                   //Lock Menu Buttons
+	SOFTWARE_LOCK_POWER          = OSD_BUTTON_LOCK_POWER,                 //Lock Power Button
+	SOFTWARE_LOCK_MENU_POWER     = OSD_BUTTON_LOCK_OSD_POWER,             //Lock Menu + Power Button
 	SOFTWARE_LOCK_COLOR_SETTINGS = OSD_BUTTON_LOCK_COLOR_CUSTOM_SETTINGS, //Lock Color Custom Settings
-	SOFTWARE_LOCK_EXCEPT_POWER = OSD_BUTTON_LOCK_EXCEPT_POWER             //Lock all except Power Button
+	SOFTWARE_LOCK_EXCEPT_POWER   = OSD_BUTTON_LOCK_EXCEPT_POWER           //Lock all except Power Button
 }
 SOFTWARE_LOCK;
 
@@ -436,7 +473,7 @@ USB_SELECTION;
 
 typedef enum auto_sleep
 {
-	AUTO_SLEEP_DISPLAY = 1,
+	AUTO_SLEEP_DISPLAY   = 1,
 	AUTO_SLEEP_PANEL_OFF = 2
 }
 AUTO_SLEEP;
@@ -445,21 +482,21 @@ typedef enum day_selection
 {
 	DAY_SELECTION_MON_FRI = 1,
 	DAY_SELECTION_SAT_SUN = 2,
-	DAY_SELECTION_DAILY = 3
+	DAY_SELECTION_DAILY   = 3
 }
 DAY_SELECTION;
 
 typedef enum reset_menu
 {
-	RESET_MENU_POWER = 0x01, /* replace ResetPower */
-	RESET_MENU_COLOR = 0x02, 
-	RESET_MENU_OSD = 0x03, /* replace ResetOSD */
-	RESET_MENU_COLORSPACE = 0x04,
-	RESET_MENU_INPUTSOURCE = 0x05,
-	RESET_MENU_DISPLAY = 0x06,
-	RESET_MENU_PXP = 0x07,
+	RESET_MENU_POWER           = 0x01, /* replace ResetPower */
+	RESET_MENU_COLOR           = 0x02, 
+	RESET_MENU_OSD             = 0x03, /* replace ResetOSD */
+	RESET_MENU_COLORSPACE      = 0x04,
+	RESET_MENU_INPUTSOURCE     = 0x05,
+	RESET_MENU_DISPLAY         = 0x06,
+	RESET_MENU_PXP             = 0x07,
 	RESET_MENU_PERSONALIZATION = 0x08,
-	RESET_MENU_OTHERS = 0xFF
+	RESET_MENU_OTHERS          = 0xFF
 }
 RESET_MENU;
 
@@ -467,14 +504,14 @@ RESET_MENU;
 typedef enum cal_status
 {
 	CAL_STATUS_START = 0x01,
-	CAL_STATUS_END = 0xFF
+	CAL_STATUS_END   = 0xFF
 }
 CAL_STATUS;
 
 typedef enum color_control
 {
 	COLOR_CONTROL_DISABLE = OFF,
-	COLOR_CONTROL_ENABLE = ON
+	COLOR_CONTROL_ENABLE  = ON
 }
 COLOR_CONTROL;
 
@@ -487,14 +524,14 @@ CALIBRATION_SPEED;
 
 typedef enum colorimeter_profile
 {
-	COLORIMETER_PROFILE_BUILT_IN = 1,
+	COLORIMETER_PROFILE_BUILT_IN   = 1,
 	COLORIMETER_PROFILE_CORRELATED = 2
 }
 COLORIMETER_PROFILE;
 
 typedef enum validation_pattern
 {
-	VALIDATION_PATTERN_BASIC_RGB = 1,
+	VALIDATION_PATTERN_BASIC_RGB         = 1,
 	VALIDATION_PATTERN_LCD_COLOR_CHECKER = 2
 }
 VALIDATION_PATTERN;
@@ -511,10 +548,10 @@ CALVALSCHEDULER;
 typedef enum calvalschedule_type
 {
 	CALVALSCHEDULE_TYPE_BACKLIGHT_HRS = 0x01,
-	CALVALSCHEDULE_TYPE_QUARTERLY = 0x02,
-	CALVALSCHEDULE_TYPE_MONTHLY = 0x03,
-	CALVALSCHEDULE_TYPE_WEEKLY = 0x04,
-	CALVALSCHEDULE_TYPE_DAILY = 0x05
+	CALVALSCHEDULE_TYPE_QUARTERLY     = 0x02,
+	CALVALSCHEDULE_TYPE_MONTHLY       = 0x03,
+	CALVALSCHEDULE_TYPE_WEEKLY        = 0x04,
+	CALVALSCHEDULE_TYPE_DAILY         = 0x05
 }
 CALVALSCHEDULE_TYPE;
 
@@ -554,7 +591,7 @@ CALVALSCHEDULE_DAY;
 typedef enum calvalschedule_op_mode
 {
 	CALVALSCHEDULER_OP_MODE_PROMPT = 1,
-	CALVALSCHEDULER_OP_MODE_SLEEP = 2
+	CALVALSCHEDULER_OP_MODE_SLEEP  = 2
 }
 CALVALSCHEDULER_OP_MODE;
 
@@ -570,10 +607,18 @@ CALBLOCK;
 
 typedef enum colorimeter_arm
 {
-	COLORIMETER_ARM_INACTIVE	= OFF, /* arm down */
-	COLORIMETER_ARM_ACTIVE		= ON /* arm up */
+	COLORIMETER_ARM_INACTIVE = OFF, /* arm down */
+	COLORIMETER_ARM_ACTIVE   = ON   /* arm up */
 }
 COLORIMETER_ARM;
+
+/* UP3221Q */
+typedef enum monitor_orientation
+{
+	MONITOR_ORIENTATION_LANDSCAPE = 0,
+	MONITOR_ORIENTATION_PORTRAIT  = 1
+}
+MONITOR_ORIENTATION;
 
 /* DEBUG LEVEL */
 typedef enum dblevel
@@ -600,7 +645,7 @@ typedef struct MonitorDetailStruct {
 	BYTE InbuiltColorimeter; // 0 = No, 1 = Yes
 	BYTE ColorimeterName[MAX_MONITOR_NAME_LEN + 1];
 }
-MonitorDetailStructType;
+MonitorDetailStructType; //Total bytes = 31
 
 typedef struct ColorSpaceInfoStruct {
 	UWORD32 ColorSpaceMode;          //refer to enum COLOR_SPACE_MODE;
@@ -610,8 +655,9 @@ typedef struct ColorSpaceInfoStruct {
 	FLOAT Coordinate_W[2];           //(x,y) : 8bytes
 	BYTE GammaValue;                 //0x10-0x1A: 1.6-2.6, 0x20:bt1886, 0x21:sRGB, 0x22:EPD, 0x24:EBU
 	UWORD16 Luminance;
-	BYTE stTargetCalibrationDate[5]; //(mm/hh/DD/MM/YY) 5 bytes
-	BYTE stTargetValidationDate[5];  //(mm/hh/DD/MM/YY) 5 bytes
+	BYTE MeterUsedCalibration;       //Bits0-6 External colorimeter index
+	BYTE MeterUsedValidation;        //Bits0-6 External colorimeter index
+	BYTE reserved2[8];				 
 	BYTE stActualCalibrationDate[5]; //(mm/hh/DD/MM/YY) 5 bytes
 	BYTE stActualValidationDate[5];  //(mm/hh/DD/MM/YY) 5 bytes
 	BYTE CalibrationNow;             //unused
@@ -634,7 +680,7 @@ typedef struct CustomColorSpaceInfoStruct {
 	BYTE Saturation;				//0-100
 	BYTE SixAxis[6][3];				//[0-5]=[R G B C M Y] , [0-2] = H S L 0-100
 }
-CustomColorSpaceInfoStructType;
+CustomColorSpaceInfoStructType; //Total bytes = 38
 
 typedef struct CalibrationTargetInfoStruct {
 	UWORD32 ColorSpace;			 //refer to enum COLOR_SPACE
@@ -644,9 +690,9 @@ typedef struct CalibrationTargetInfoStruct {
 	FLOAT Coordinate_W[2];       //(x,y) : 8bytes
 	BYTE GammaValue;             //0x10-0x1A: 1.6-2.6, 0x20:bt1886, 0x21:sRGB, 0x22:EPD, 0x24:EBU
 	UWORD16 Luminance;
-	BYTE UniformityStatus;       //0: OFF, 1: ON
+	BYTE UniformityStatus;       //0: OFF, 1: ON (UP3221Q -- MSB Use3DLUT 0: OFF 1: ON)
 }
-CalibrationTargetInfoStructType;
+CalibrationTargetInfoStructType; //Total bytes = 40
 
 typedef struct CalibrationResultStruct {
 	UWORD32 ColorSpaceMode;           //refer to enum COLOR_SPACE_MODE; 
@@ -660,7 +706,7 @@ typedef struct CalibrationResultStruct {
 	UWORD32 ColorTemp;                //Range: 2700 <= ColorTemp <= 10000.
 	UWORD16 reserved;
 }
-CalibrationResultStructType;
+CalibrationResultStructType; //Total bytes = 269
 
 typedef struct ValidationResultStruct {
 	UWORD32 ColorSpaceMode;              //refer to enum COLOR_SPACE_MODE; 
@@ -685,7 +731,35 @@ typedef struct ValidationResultStruct {
 	BYTE stActualValidationDate[5];      //(mm/hh/DD/MM/YY) 5 bytes
 	UWORD16 reserved;
 }
-ValidationResultStructType;
+ValidationResultStructType; //Total bytes = 5837
+
+typedef struct ValidationResultStruct2 {
+	UWORD32 ColorSpaceMode;              //refer to enum COLOR_SPACE_MODE; 
+	BYTE MeasureDataReady;
+	BYTE Gamut;                          //0x00: Native, 0x01: AdobeRGB, 0x02: sRGB, 0x03:DCI-P3, 0x06: REC709, 0x07: REC2020.
+	BYTE GammaType;                      //refer to enum GAMMA_TYPE;
+	FLOAT GammaValue;                    //Range: 10 <= GammaValue <= 26.
+	BYTE PatternCount;                   //Indicates the pattern count of validation pattern; Ex: 17=QUICK, 50=FULL.
+	UWORD16 ColorPatch[50][3];			 //Indicates the RGB detailed color patch of each validation pattern.
+	double Target_XYZ[50][3];            //Double X, Y, Z
+	double Target_Lab[50][3];            //Double L, a, b
+	double Measured_XYZ[50][3];          //Double X, Y, Z
+	double Measured_Lab[50][3];          //Double L, a, b
+	UWORD16 reserved2;
+	FLOAT VerifiedGammaValue;
+	FLOAT VerifiedColorTemp;
+	FLOAT VerifiedGamutCoordinate[3][3]; //FLOAT X, Y, Z
+	double DeltaIE2K[50];
+	double DeltaEab[50];
+	double DeltaE94[50];
+	double DeltaHab[50];
+	double DeltaEITP[50];
+	BYTE stTargetValidationDate[5];      //(mm/hh/DD/MM/YY) 5 bytes
+	BYTE stActualValidationDate[5];      //(mm/hh/DD/MM/YY) 5 bytes
+	UWORD16 reserved;
+}
+ValidationResultStruct2Type; //Total bytes = 7170
+
 
 #pragma pack(pop)
 
