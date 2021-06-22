@@ -23,3 +23,9 @@ cp include/libs/libDellMonitorSdkLib.dylib /usr/local/lib
 cargo run
 ```
 
+You may not want to do this on Mac though because of the security bullshit.
+
+To run this E2E, try this:
+```
+rm DellMonitorSdk.log && DYLD_LIBRARY_PATH=include/libs cargo run; cat DellMonitorSdk.log
+```

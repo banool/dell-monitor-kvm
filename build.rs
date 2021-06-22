@@ -12,11 +12,11 @@ fn main() {
     println!("cargo:rustc-link-lib=dylib=DellMonitorSdkLib");
     // This only tells cargo where to find the library at compile
     // time, not the binary where to find the library at runtime.
-    println!("cargo:rustc-link-search=native=include/libs");
+    println!("cargo:rustc-link-search=native=include/latest/libs");
 
     let bindings = bindgen::Builder::default()
-        .header("include/headers/UP_API.h")
-        .header("include/headers/UP_DATA.h")
+        .header("include/latest/headers/UP_API.h")
+        .header("include/latest/headers/UP_DATA.h")
         .blocklist_type("tm")
         .blocklist_function("SetDateTime")
         .blocklist_function("GetDateTime")
