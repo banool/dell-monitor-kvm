@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include "UP_API.h"
-#include "UP_DATA.h"
+#include "headers/UP_API.h"
+#include "headers/UP_DATA.h"
 
 int main(int argc, char * argv[]) {
   int res;
