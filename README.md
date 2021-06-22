@@ -1,6 +1,6 @@
 # Dell Monitor KVM
 
-This repository uses the SDK provided by Dell (specifically 3.0 [here](https://www.dell.com/support/home/en-us/drivers/driversdetails?driverid=ktgyn)) to control the monitor such that you can switch inputs.
+This repository uses the SDK provided by Dell (specifically 3.1.0 [here](https://www.dell.com/support/home/en-us/drivers/driversdetails?driverid=ktgyn)) to control the monitor such that you can switch inputs.
 
 ## Development
 Development is easy, just run this:
