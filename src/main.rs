@@ -21,7 +21,7 @@ fn call(res: MONITOR_CODE, desc: &str) -> Result<()> {
 
 fn main() -> Result<()> {
     unsafe {
-        call(SetDebugLevel(3), "SetDebugLevel")?;
+        call(SetDebugLevel(4), "SetDebugLevel")?;
     }
 
     unsafe {

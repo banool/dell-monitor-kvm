@@ -7,6 +7,12 @@
 int main(int argc, char * argv[]) {
   int res;
   BYTE b8Val;
+  /** Set log level **/
+  res = SetDebugLevel(4);
+  if (res != MONITOR_SUCCESS) {
+    fprintf(stderr, "Error setting log level\n");
+    return 1;
+  }
   /** Initialize the SDK **/
   res = Initialize();
   if (res != MONITOR_SUCCESS) {
